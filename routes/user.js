@@ -1,4 +1,3 @@
-const route = require("color-convert/route");
 const express = require("express");
 const mongoose = require("mongoose");
 const { User, validateUser } = require("../models/user");

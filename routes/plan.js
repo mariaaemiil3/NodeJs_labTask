@@ -10,6 +10,7 @@ router.get("/", async (req, res) => {
     res.json(plans);
   } else {
     const plans = await Plan.find({}, { users: 0, _id: 0, __v: 0 });
+    // Plan.exists()
     res.json(plans);
   }
 });
@@ -30,8 +31,14 @@ router.post("/subscribe/:id", async (req, res) => {
     return res.status(404).json({ message: "No user found with this id" });
 
   const plan = await Plan.findById(req.params.id);
-//   if (plan.users.contains(userId))
-//     return res.status(406).json({ message: "You're already subscribed to this plan" });
+
+  for (let i = 0; i < plan.users.length; i++) {
+    if (plan.users[i] == userId)
+      return res
+        .status(406)
+        .json({ message: "You're already subscribed to this plan" });
+  }
+
   plan.users.push(userId);
   await plan.save();
   res.json({ message: "Subscribed successfully" });
@@ -43,13 +50,14 @@ router.delete("/unsubscribe/:id", async (req, res) => {
     return res.status(404).json({ message: "No user found with this id" });
 
   const plan = await Plan.findById(req.params.id);
-//   if ( plan.users.contains(userId) ) {
-    plan.users.remove(userId);
-    await plan.save();
-    //return 
-    res.json({ message: "Unsubscribed successfully" });
-//   }
-  //res.status(406).json({ message: "You're not even subscribed to this plan!" });
+  for (let i = 0; i < plan.users.length; i++) {
+    if (plan.users[i] == userId) {
+      plan.users.remove(userId);
+      await plan.save();
+      return res.json({ message: "Unsubscribed successfully" });
+    }
+  }
+  res.status(406).json({ message: "You're not even subscribed to this plan!" });
 });
 
 router.post("/", async (req, res) => {
